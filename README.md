@@ -19,7 +19,7 @@ tests/
 ├── unit_tests/              # Individual module tests
 │   ├── alu_tb.sv
 │   ├── reg_file_tb.sv
-│   └── ... more stuff if you need ( dot products, etc if we extend to vector later )
+│   └── ...                  # more stuff if you need ( dot products, etc if we extend to vector later )
 ├── integration_tests/       # Tests for module combinations
 ├── system_tests/            # Full CPU tests
 │   ├── add_test.sv

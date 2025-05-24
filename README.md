@@ -2,6 +2,7 @@
 
 First project on System Architectures using System Verilogs.
 
+```py
 src/      
 │---- datapath.sv           # Main datapath implementation
 │---- control_unit.sv       # Control unit implementation
@@ -28,5 +29,5 @@ tests/
     ├── fibonacci.asm
     ├── factorial.asm
     └── ...
-
+```
 

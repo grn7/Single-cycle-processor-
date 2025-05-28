@@ -28,7 +28,7 @@ module tb_reg_file;
     always #5 clk=~clk; //time period is 10
 
     initial begin
-        $dumpfile("wave.vcd");
+        $dumpfile("wave.vcd"); //for gtkwave
         $dumpvars(0,tb_reg_file);
         
         $display("Test register file \n");

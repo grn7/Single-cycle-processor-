@@ -1,3 +1,5 @@
+`include "definitions.sv"
+
 module alu (
     input  logic [63:0] a,
     input  logic [63:0] b,
@@ -8,11 +10,11 @@ module alu (
 
     always_comb begin
         case (alu_control)
-            3'b000: result = a + b;    // ADD
-            3'b001: result = a - b;    // SUB
-            3'b010: result = a & b;    // AND
-            3'b011: result = a | b;    // OR
-            default: result = 64'b0;
+            `ALU_ADD: result = a + b;
+            `ALU_SUB: result = a - b;
+            `ALU_AND: result = a & b;
+            `ALU_OR:  result = a | b;
+            default:  result = 64'b0;
         endcase
     end
 

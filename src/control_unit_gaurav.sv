@@ -10,10 +10,10 @@ module control_unit (
     output logic       mem_write,      
     output logic       mem_to_reg,     
     output logic       alu_src,        
-    output logic       branch,         
+    output logic       branch         
     
     //program counter control
-    output logic       jump            //enable unconditional jump (unused)
+    // output logic       jump            //enable unconditional jump (unused)
 );
 
     always_comb begin
@@ -24,7 +24,7 @@ module control_unit (
         mem_to_reg  = 1'b0;       //select ALU result by default
         alu_src     = 1'b0;       //use register for ALU input B by default
         branch      = 1'b0;       //don't branch by default
-        jump        = 1'b0;       //don't jump by default
+        // jump        = 1'b0;       //don't jump by default
         
         case (opcode)
             `OP_I_TYPE: begin
@@ -35,7 +35,7 @@ module control_unit (
                 mem_to_reg  = 1'b1;       
                 alu_src     = 1'b1;       //use immediate val (offset) for ALU input B
                 branch      = 1'b0;       
-                jump        = 1'b0;       
+                // jump        = 1'b0;       
             end
             
             `OP_S_TYPE: begin
@@ -46,7 +46,7 @@ module control_unit (
                 mem_to_reg  = 1'b0;       //don't care (not writing to register)
                 alu_src     = 1'b1;       
                 branch      = 1'b0;       
-                jump        = 1'b0;       
+                // jump        = 1'b0;       
             end
 
             `OP_R_TYPE: begin
@@ -82,7 +82,7 @@ module control_unit (
                 mem_to_reg  = 1'b0;       
                 alu_src     = 1'b0;       
                 branch      = 1'b0;       
-                jump        = 1'b0;       
+                // jump        = 1'b0;       
             end
 
             `OP_B_TYPE: begin
@@ -93,7 +93,7 @@ module control_unit (
                 mem_to_reg  = 1'b0;       
                 alu_src     = 1'b0;       
                 branch      = 1'b1;      
-                jump        = 1'b0;       
+                // jump        = 1'b0;       
             end
 
             default: begin
@@ -104,7 +104,7 @@ module control_unit (
                 mem_to_reg  = 1'b0;       
                 alu_src     = 1'b0;       
                 branch      = 1'b0;       
-                jump        = 1'b0;      
+                // jump        = 1'b0;      
                 
                 $display("Warning: Unknown opcode 0x%h encountered", opcode);
             end

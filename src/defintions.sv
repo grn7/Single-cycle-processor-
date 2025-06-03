@@ -7,11 +7,11 @@
 `define ALU_AND 3'b010
 `define ALU_OR  3'b011
 
-// Opcode definitions
-`define OP_R_TYPE   7'b0110011
-`define OP_I_TYPE   7'b0000011
-`define OP_S_TYPE   7'b0100011
-`define OP_B_TYPE   7'b1100011
+// Opcode definitions (removed JAL - no jump instructions)
+`define OP_R_TYPE   7'b0110011  // ADD, SUB, AND, OR
+`define OP_I_TYPE   7'b0000011  // LD (Load Double)
+`define OP_S_TYPE   7'b0100011  // SD (Store Double)
+`define OP_B_TYPE   7'b1100011  // BEQ (Branch if Equal) - ONLY branching instruction
 
 // Function codes
 `define FUNC3_ADD_SUB 3'b000

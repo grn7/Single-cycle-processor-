@@ -1,4 +1,4 @@
-`include "definitions.sv"
+`include "defintions.sv"
 
 module single_cycle_cpu (
     input  logic clk,
@@ -11,10 +11,10 @@ module single_cycle_cpu (
     logic [31:0] instruction;
     logic [63:0] imm;
 
-    // Control signals
+    // Control signals (removed jump)
     logic [2:0] alu_control;
     logic reg_write, mem_read, mem_write, mem_to_reg;
-    logic alu_src, branch, jump;
+    logic alu_src, branch;
 
     // Datapath to memory connections
     logic [63:0] alu_result, write_data_memory;
@@ -22,7 +22,7 @@ module single_cycle_cpu (
     logic [63:0] read_data_memory;
     logic zero;
 
-    // Instantiate PC logic
+    // Instantiate PC logic (removed jump signal)
     pc_logic pc_module (
         .clk(clk),
         .rst(rst),
@@ -44,7 +44,7 @@ module single_cycle_cpu (
         .imm_out(imm)
     );
 
-    // Control Unit
+    // Control Unit (removed jump signal)
     control_unit cu (
         .opcode (instruction[6:0]),
         .funct3 (instruction[14:12]),
@@ -55,8 +55,7 @@ module single_cycle_cpu (
         .mem_write(mem_write),
         .mem_to_reg(mem_to_reg),
         .alu_src(alu_src),
-        .branch(branch),
-        .jump(jump)  // Currently unused
+        .branch(branch)
     );
 
     // Data Memory

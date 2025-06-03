@@ -1,4 +1,4 @@
-`include "definitions.sv"
+`include "defintions.sv"
 
 module alu (
     input  logic [63:0] a,

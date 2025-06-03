@@ -11,7 +11,7 @@ module instr_mem #(
     initial begin
         //initialize all memory to NOP instructions first
         for (int i = 0; i < mem_size; i++) begin
-            memory[i] = 32'h00000013; 
+            memory[i] = 32'h00000003; 
         end
         
         //load instructions from the .mem file

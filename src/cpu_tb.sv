@@ -13,7 +13,7 @@
 // Jump functionality has been completely removed - only BEQ for branching.
 //==============================================================================
 
-`include "defintions.sv"
+`include "definitions.sv"
 
 module tb_single_cycle_cpu_paper;
 

@@ -1,4 +1,4 @@
-`include "defintions.sv"
+`include "definitions.sv"
 
 module control_unit (
     input  logic [6:0] opcode,

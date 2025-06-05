@@ -1,7 +1,7 @@
 module data_mem #(
     parameter mem_size=256, //size in terms of 64 bit words
-    parameter rom_size=16,
-    parameter rom_file="data.mem" //file to initialize rom
+    parameter rom_size=4,
+    parameter rom_file="programs/data.mem" //file to initialize rom
 )(
     input logic clk,
     input logic rst,
@@ -12,7 +12,7 @@ module data_mem #(
     output logic[63:0] rd_data
 );
 
-logic[63:0] memory[mem_size-1:0]; //data memory
+logic[63:0] memory[0:mem_size-1]; //data memory
 
 //convert byte address to word address 
 logic[31:0] word_addr=addr[31:3];

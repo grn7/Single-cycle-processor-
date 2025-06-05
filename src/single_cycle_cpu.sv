@@ -1,4 +1,4 @@
-`include "defintions.sv"
+`include "definitions.sv"
 
 module single_cycle_cpu (
     input  logic clk,

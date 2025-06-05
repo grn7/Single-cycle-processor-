@@ -6,23 +6,19 @@ module single_cycle_cpu (
     output logic [63:0] debug_out  // Output from register x31 for monitoring
 );
 
-    // Program counter
     logic [63:0] pc;
     logic [31:0] instruction;
     logic [63:0] imm;
 
-    // Control signals (removed jump)
     logic [2:0] alu_control;
     logic reg_write, mem_read, mem_write, mem_to_reg;
     logic alu_src, branch;
 
-    // Datapath to memory connections
     logic [63:0] alu_result, write_data_memory;
     logic [4:0] rd_addr;
     logic [63:0] read_data_memory;
     logic zero;
 
-    // Instantiate PC logic (removed jump signal)
     pc_logic pc_module (
         .clk(clk),
         .rst(rst),
@@ -32,19 +28,16 @@ module single_cycle_cpu (
         .pc(pc)
     );
 
-    // Instruction Memory (ROM)
     instr_mem instr_mem_inst (
-        .address(pc[31:0]),          // 32-bit PC used as byte address
+        .address(pc[31:0]),
         .instruction(instruction)
     );
 
-    // Sign Extension
     sign_extend sign_ext_inst (
         .instr(instruction),
         .imm_out(imm)
     );
 
-    // Control Unit (removed jump signal)
     control_unit cu (
         .opcode (instruction[6:0]),
         .funct3 (instruction[14:12]),
@@ -58,7 +51,6 @@ module single_cycle_cpu (
         .branch(branch)
     );
 
-    // Data Memory
     data_mem data_memory (
         .clk(clk),
         .rst(rst),
@@ -69,7 +61,6 @@ module single_cycle_cpu (
         .rd_data(read_data_memory)
     );
 
-    // Datapath
     datapath datapath_inst (
         .clk(clk),
         .rst(rst),

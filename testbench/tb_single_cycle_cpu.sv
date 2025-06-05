@@ -1,4 +1,3 @@
-// testbench:
 `timescale 1ns/1ps
 module tb_single_cycle_cpu;
     logic clk, rst;
@@ -18,6 +17,7 @@ module tb_single_cycle_cpu;
     initial begin
         $dumpfile("waveform.vcd");
         $dumpvars(0, tb_single_cycle_cpu);
+
         rst = 1;
         #15;
         rst = 0;
@@ -25,4 +25,11 @@ module tb_single_cycle_cpu;
         // Run simulation for 500ns
         #500 $finish;
     end
+
+    // Monitor debug output (show PC and instruction)
+    always_ff @(posedge clk) begin
+        $display("Time: %0t | PC: 0x%08h | Instruction: 0x%08h", 
+                 $time, debug_out[63:32], debug_out[31:0]);
+    end
+
 endmodule

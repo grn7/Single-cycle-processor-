@@ -1,5 +1,5 @@
 module instr_mem #(
-    parameter mem_size = 256,  //no of instruction words
+    parameter mem_size = 6,  //no of instruction words
     parameter mem_file = "programs/program.mem"  
 ) (
     input  logic [31:0] address,     //address of instruction to read (byte address)

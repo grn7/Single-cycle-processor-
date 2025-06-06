@@ -1,26 +1,28 @@
 module instr_mem #(
-    parameter mem_size = 6,  //no of instruction words
-    parameter mem_file = "programs/program.mem"  
+    parameter integer mem_size = 6,
+    parameter string  mem_file  = "programs/program.mem"
 ) (
-    input  logic [31:0] address,     //address of instruction to read (byte address)
-    output logic [31:0] instruction  //instruction at that address
+    input  logic [31:0] address,    // PC[31:0] as byte address
+    output logic [31:0] instruction // fetched 32‑bit instruction
 );
 
-    logic [31:0] memory [0:mem_size-1];
+    logic [31:0] memory_array [0:mem_size-1];
 
     initial begin
-        //initialize all memory to NOP instructions first
+        // Initialize all 6 slots to “R‑type NOP” = add x0,x0,x0 = 32'h00000033
         for (int i = 0; i < mem_size; i++) begin
-            memory[i] = 32'h00000003; 
+            memory_array[i] = 32'h00000033;
         end
-        
-        //load instructions from the .mem file
-        $readmemh(mem_file, memory, 0, 5);  // for 6 instructions
-        
+
+        // Load exactly 6 instructions from the .mem file
+        $display("Loading instruction memory from %s", mem_file);
+        $readmemh(mem_file, memory_array);
     end
-    
-    //asynchronous read 
-    //convert byte address to word address by dividing by 4 
-    assign instruction = memory[address[31:2]];
+
+    // Convert byte address to word index (divide by 4).
+    // If out of bounds (i.e. index ≥ mem_size), return R‑type NOP = 32'h00000033
+    assign instruction = (address[31:2] < mem_size)
+                       ? memory_array[address[31:2]]
+                       : 32'h00000033;
 
 endmodule

@@ -1,28 +1,30 @@
 module instr_mem #(
-    parameter integer mem_size = 6,
-    parameter string  mem_file  = "programs/program.mem"
+    parameter integer mem_size = 5
 ) (
-    input  logic [31:0] address,    // PC[31:0] as byte address
-    output logic [31:0] instruction // fetched 32‑bit instruction
+    input  logic [31:0] address,
+    output logic [31:0] instruction
 );
 
-    logic [31:0] memory_array [0:mem_size-1];
-
+    // Instruction array
+    reg [31:0] memory_array [0:mem_size-1];
+    
+    // Initialize with our test program
     initial begin
-        // Initialize all 6 slots to “R‑type NOP” = add x0,x0,x0 = 32'h00000033
-        for (int i = 0; i < mem_size; i++) begin
-            memory_array[i] = 32'h00000033;
-        end
-
-        // Load exactly 6 instructions from the .mem file
-        $display("Loading instruction memory from %s", mem_file);
-        $readmemh(mem_file, memory_array);
+        memory_array[0] = 32'h00003083;  // ld x1, 0(x0)   - Load 15 into x1
+        memory_array[1] = 32'h00803103;  // ld x2, 8(x0)   - Load 25 into x2
+        memory_array[2] = 32'h002081b3;  // add x3, x1, x2 - x3 = x1 + x2 = 40
+        memory_array[3] = 32'h00300f93;  // addi x31, x0, 3 - x31 = 3
+        memory_array[4] = 32'h00000013;  // nop
+        
+        $display("Instructions loaded:");
+        $display("  [0]: 0x%h (ld x1, 0(x0))", memory_array[0]);
+        $display("  [1]: 0x%h (ld x2, 8(x0))", memory_array[1]);
+        $display("  [2]: 0x%h (add x3, x1, x2)", memory_array[2]);
+        $display("  [3]: 0x%h (addi x31, x0, 3)", memory_array[3]);
     end
 
-    // Convert byte address to word index (divide by 4).
-    // If out of bounds (i.e. index ≥ mem_size), return R‑type NOP = 32'h00000033
-    assign instruction = (address[31:2] < mem_size)
-                       ? memory_array[address[31:2]]
-                       : 32'h00000033;
+    // Output instruction
+    wire [31:0] word_addr = address[31:2];
+    assign instruction = (word_addr < mem_size) ? memory_array[word_addr] : 32'h00000013;
 
 endmodule

@@ -12,21 +12,24 @@ module datapath (
     output logic [63:0] write_data_memory,
     output logic [4:0]  rd_addr,
     output logic        zero,
-    output logic [63:0] debug_out  // (optional) contents of x31
+    output logic [63:0] debug_out
 );
 
-    // Register‑file wires
+    // Internal signals
     logic [63:0] rs1_data, rs2_data;
     logic [63:0] imm;
     logic [63:0] alu_b;
     logic [63:0] wb_data;
 
-    // Decode register indices
-    logic [4:0] rs1 = instruction[19:15]; 
-    logic [4:0] rs2 = instruction[24:20];
+    // Extract register addresses
+    wire [4:0] rs1 = instruction[19:15];
+    wire [4:0] rs2 = instruction[24:20];
     assign rd_addr = instruction[11:7];
 
-    // Instantiate register file
+    // Sign extend immediate (I-type)
+    assign imm = {{52{instruction[31]}}, instruction[31:20]};
+
+    // Register file
     reg_file rf (
         .clk        (clk),
         .rst        (rst),
@@ -40,13 +43,10 @@ module datapath (
         .debug_output(debug_out)
     );
 
-    // Sign‑extended immediate (LD / BEQ)
-    assign imm   = {{52{instruction[31]}}, instruction[31:20]};
+    // ALU input mux
+    assign alu_b = alu_src ? imm : rs2_data;
 
-    // ALU input mux: either register or immediate
-    assign alu_b = (alu_src) ? imm : rs2_data;
-
-    // Launch ALU
+    // ALU
     alu alu_inst (
         .a           (rs1_data),
         .b           (alu_b),
@@ -55,10 +55,10 @@ module datapath (
         .zero        (zero)
     );
 
-    // Data memory will write rs2_data
+    // Memory write data
     assign write_data_memory = rs2_data;
 
-    // Write‑back mux: from memory or from ALU
-    assign wb_data = (mem_to_reg) ? read_data_memory : alu_result;
+    // Write-back mux
+    assign wb_data = mem_to_reg ? read_data_memory : alu_result;
 
 endmodule

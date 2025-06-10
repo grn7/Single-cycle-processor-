@@ -3,13 +3,13 @@
 module single_cycle_cpu (
     input  logic        clk,
     input  logic        rst,
-    output logic [63:0] debug_out   // packs {PC[31:0], instruction[31:0]} for our testbench
+    output logic [63:0] debug_out
 );
 
-    // ***** Internal wires *****
-    logic [63:0] pc;                // 64‑bit program counter
-    logic [31:0] instruction;       // 32‑bit fetched instruction
-    logic [63:0] imm;               // sign‑extended immediate
+    // Internal signals
+    logic [63:0] pc;
+    logic [31:0] instruction;
+    logic [63:0] imm;
 
     // Control signals
     logic [2:0]  alu_control;
@@ -20,16 +20,14 @@ module single_cycle_cpu (
     logic        alu_src;
     logic        branch;
 
-    // Datapath ↔ Memory wires
+    // Datapath signals
     logic [63:0] alu_result;
     logic [63:0] write_data_memory;
     logic [63:0] read_data_memory;
-    logic [4:0]  rd_addr;   // unused at top level
+    logic [4:0]  rd_addr;
     logic        zero;
 
-    // ***** Module instantiations *****
-
-    // 1) Program Counter logic
+    // Program Counter
     pc_logic pc_inst (
         .clk    (clk),
         .rst    (rst),
@@ -39,22 +37,19 @@ module single_cycle_cpu (
         .pc     (pc)
     );
 
-    // 2) Instruction Memory (reads from "programs/program.mem")
-    instr_mem #(
-        .mem_size(6),
-        .mem_file ("programs/program.mem")
-    ) instr_mem_inst (
+    // Instruction Memory
+    instr_mem #(.mem_size(5)) instr_mem_inst (
         .address    (pc[31:0]),
         .instruction(instruction)
     );
 
-    // 3) Sign‑extension unit (I‑type or B‑type)
+    // Sign Extension
     sign_extend sign_ext_inst (
         .instr   (instruction),
         .imm_out (imm)
     );
 
-    // 4) Control Unit
+    // Control Unit
     control_unit cu_inst (
         .opcode      (instruction[6:0]),
         .funct3      (instruction[14:12]),
@@ -68,22 +63,18 @@ module single_cycle_cpu (
         .branch      (branch)
     );
 
-    // 5) Data Memory
-    data_mem #(
-        .mem_size(256),
-        .rom_size(4),
-        .rom_file("programs/data.mem")
-    ) data_mem_inst (
+    // Data Memory
+    data_mem #(.mem_size(256), .rom_size(8)) data_mem_inst (
         .clk       (clk),
         .rst       (rst),
         .addr      (alu_result[31:0]),
         .wr_data   (write_data_memory),
         .wr_enable (mem_write),
-        .rd_enable (mem_read),
+        .rd_enable (1'b1),
         .rd_data   (read_data_memory)
     );
 
-    // 6) Datapath
+    // Datapath
     datapath dp_inst (
         .clk                 (clk),
         .rst                 (rst),
@@ -97,11 +88,7 @@ module single_cycle_cpu (
         .write_data_memory   (write_data_memory),
         .rd_addr             (rd_addr),
         .zero                (zero),
-        .debug_out           (/*not used at top‑level*/ ) 
+        .debug_out           (debug_out)
     );
-
-    // ***** Pack PC + instruction into debug_out for the testbench *****
-    // Upper 32 bits = PC[31:0], Lower 32 bits = fetched instruction[31:0]
-    assign debug_out = { pc[31:0], instruction };
 
 endmodule

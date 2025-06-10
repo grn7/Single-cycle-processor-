@@ -14,7 +14,7 @@ module alu (
             `ALU_SUB: result = a - b;
             `ALU_AND: result = a & b;
             `ALU_OR:  result = a | b;
-            default:  result = 64'b0;
+            default:  result = a + b;
         endcase
     end
 

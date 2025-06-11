@@ -17,7 +17,7 @@ module sign_extend (
     // B-type immediate (bits: [31], [7], [30:25], [11:8], then <<1) - for BEQ
     assign imm_b = {{51{instr[31]}}, instr[31], instr[7], instr[30:25], instr[11:8], 1'b0};
 
-    // Fixed version - replace always_comb with direct assignments to avoid the warning
+    // Select appropriate immediate based on instruction type
     assign imm_out = (instr[6:0] == `OP_S_TYPE) ? imm_s :
                      (instr[6:0] == `OP_B_TYPE) ? imm_b : imm_i;
 

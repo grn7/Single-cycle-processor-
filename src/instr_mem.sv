@@ -1,6 +1,6 @@
 module instr_mem #(
     parameter integer mem_size = 17,  // Increased from 10 to 20
-    parameter string  mem_file = "programs/program.mem"
+    parameter string  mem_file = "programs/fibo_comp.mem"
 ) (
     input  logic [31:0] address,
     output logic [31:0] instruction

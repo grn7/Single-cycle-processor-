@@ -37,7 +37,7 @@ module single_cycle_cpu (
         .pc     (pc)
     );
 
-    // Instruction Memory - now loads from file
+    // Instruction Memory
     instr_mem #(
         .mem_size(17),
         .mem_file("programs/fibo_comp.mem")
@@ -66,10 +66,10 @@ module single_cycle_cpu (
         .branch      (branch)
     );
 
-    // Data Memory - now loads from file
+    // Data Memory - reduce ROM size to allow more writes
     data_mem #(
         .mem_size(256),
-        .rom_size(2),
+        .rom_size(2),  // Only protect first 2 addresses
         .rom_file("programs/fibo_data.mem")
     ) data_mem_inst (
         .clk       (clk),
@@ -81,12 +81,13 @@ module single_cycle_cpu (
         .rd_data   (read_data_memory)
     );
 
-    // Datapath
+    // Datapath - now passes immediate from sign_extend
     datapath dp_inst (
         .clk                 (clk),
         .rst                 (rst),
         .instruction         (instruction),
         .read_data_memory    (read_data_memory),
+        .imm_ext             (imm),  // Pass immediate from sign_extend
         .alu_control         (alu_control),
         .reg_write           (reg_write),
         .alu_src             (alu_src),

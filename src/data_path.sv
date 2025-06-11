@@ -3,6 +3,7 @@ module datapath (
     input  logic        rst,
     input  logic [31:0] instruction,
     input  logic [63:0] read_data_memory,
+    input  logic [63:0] imm_ext,           // Add immediate input from sign_extend
     input  logic [2:0]  alu_control,
     input  logic        reg_write,
     input  logic        alu_src,
@@ -17,7 +18,6 @@ module datapath (
 
     // Internal signals
     logic [63:0] rs1_data, rs2_data;
-    logic [63:0] imm;
     logic [63:0] alu_b;
     logic [63:0] wb_data;
 
@@ -25,9 +25,6 @@ module datapath (
     wire [4:0] rs1 = instruction[19:15];
     wire [4:0] rs2 = instruction[24:20];
     assign rd_addr = instruction[11:7];
-
-    // Sign extend immediate (I-type)
-    assign imm = {{52{instruction[31]}}, instruction[31:20]};
 
     // Register file
     reg_file rf (
@@ -43,8 +40,8 @@ module datapath (
         .debug_output(debug_out)
     );
 
-    // ALU input mux
-    assign alu_b = alu_src ? imm : rs2_data;
+    // ALU input mux - use imm_ext instead of local imm
+    assign alu_b = alu_src ? imm_ext : rs2_data;
 
     // ALU
     alu alu_inst (

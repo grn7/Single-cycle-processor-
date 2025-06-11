@@ -1,6 +1,7 @@
 module data_mem #(
     parameter integer mem_size = 256,
-    parameter integer rom_size = 8
+    parameter integer rom_size = 8,
+    parameter string  rom_file = "programs/fibo_data.mem"
 ) (
     input  logic        clk,
     input  logic        rst,
@@ -20,22 +21,29 @@ module data_mem #(
     // Initialize memory
     integer i;
     initial begin
+        // Initialize all memory to zero
         for (i = 0; i < mem_size; i = i + 1) begin
             memory_array[i] = 64'b0;
         end
         
-        // Set test data
-        memory_array[0] = 64'd15;  // Address 0: value 15
-        memory_array[1] = 64'd25;  // Address 8: value 25
+        // Load ROM data from file
+        $display("Loading data memory from %s", rom_file);
+        $readmemh(rom_file, memory_array, 0, rom_size-1);
         
-        $display("Memory initialized: [0]=%0d, [1]=%0d", memory_array[0], memory_array[1]);
+        // Display loaded data
+        $display("Loaded data memory:");
+        for (i = 0; i < rom_size; i = i + 1) begin
+            $display("  [%0d]: 0x%h (%0d)", i, memory_array[i], memory_array[i]);
+        end
     end
 
     // Write operation
     always_ff @(posedge clk) begin
-        if (wr_enable && word_addr < mem_size) begin
+        if (wr_enable && word_addr >= rom_size && word_addr < mem_size) begin
             memory_array[word_addr] <= wr_data;
             $display("MEM WRITE: addr=%0d, data=%0d", word_addr, wr_data);
+        end else if (wr_enable && word_addr < rom_size) begin
+            $display("WARNING: Attempted write to ROM region at address %0d", word_addr);
         end
     end
 

@@ -21,6 +21,7 @@ module tb_single_cycle_cpu;
         $dumpvars(0, tb_single_cycle_cpu);
 
         $display("=== RISC-V Single Cycle CPU Test ===");
+        $display("Loading program and data from .mem files");
         $display("Program: Load 15, Load 25, Add them, Set debug to 3");
         $display("");
 
@@ -44,14 +45,21 @@ module tb_single_cycle_cpu;
         if (debug_out == 64'd3) begin
             $display("✓ SUCCESS: Debug register correct!");
         end else begin
-            $display("✗ FAILURE: Debug register wrong");
+            $display("✗ FAILURE: Debug register wrong, expected 3, got %0d", debug_out);
         end
         
         if (uut.dp_inst.rf.registers[3] == 64'd40) begin
             $display("✓ SUCCESS: Addition correct! 15 + 25 = 40");
         end else begin
-            $display("✗ FAILURE: Addition wrong");
+            $display("✗ FAILURE: Addition wrong, expected 40, got %0d", uut.dp_inst.rf.registers[3]);
         end
+        
+        $display("\n=== PROGRAM VERIFICATION ===");
+        $display("Expected execution:");
+        $display("1. LD x1, 0(x0)    -> x1 = 15");
+        $display("2. LD x2, 8(x0)    -> x2 = 25");
+        $display("3. ADD x3, x1, x2  -> x3 = 40");
+        $display("4. ADDI x31, x0, 3 -> x31 = 3");
         
         $finish;
     end

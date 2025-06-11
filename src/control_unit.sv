@@ -64,7 +64,18 @@ module control_unit (
 
                 // R-Type (ADD/SUB/AND/OR)
                 `OP_R_TYPE: begin
-                    alu_control = `ALU_ADD;
+                    case (funct3)
+                        `FUNC3_ADD_SUB: begin
+                            if (funct7 == `FUNC7_SUB)
+                                alu_control = `ALU_SUB;
+                            else
+                                alu_control = `ALU_ADD;
+                        end
+                        `FUNC3_AND: alu_control = `ALU_AND;
+                        `FUNC3_OR:  alu_control = `ALU_OR;
+                        default:    alu_control = `ALU_ADD;
+                    endcase
+                    
                     reg_write   = 1'b1;
                     mem_read    = 1'b0;
                     mem_write   = 1'b0;
@@ -75,13 +86,13 @@ module control_unit (
 
                 // B-Type (BEQ)
                 `OP_B_TYPE: begin
-                    alu_control = `ALU_SUB;
-                    reg_write   = 1'b0;
-                    mem_read    = 1'b0;
-                    mem_write   = 1'b0;
-                    mem_to_reg  = 1'b0;
-                    alu_src     = 1'b0;
-                    branch      = 1'b1;
+                    alu_control = `ALU_SUB;  // Subtract to compare
+                    reg_write   = 1'b0;      // Don't write to register
+                    mem_read    = 1'b0;      // Don't access memory
+                    mem_write   = 1'b0;      // Don't access memory
+                    mem_to_reg  = 1'b0;      // Don't care
+                    alu_src     = 1'b0;      // Use register for comparison
+                    branch      = 1'b1;      // This is a branch instruction
                 end
 
                 default: begin

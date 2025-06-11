@@ -37,8 +37,11 @@ module single_cycle_cpu (
         .pc     (pc)
     );
 
-    // Instruction Memory
-    instr_mem #(.mem_size(5)) instr_mem_inst (
+    // Instruction Memory - now loads from file
+    instr_mem #(
+        .mem_size(17),
+        .mem_file("programs/fibo_comp.mem")
+    ) instr_mem_inst (
         .address    (pc[31:0]),
         .instruction(instruction)
     );
@@ -63,8 +66,12 @@ module single_cycle_cpu (
         .branch      (branch)
     );
 
-    // Data Memory
-    data_mem #(.mem_size(256), .rom_size(8)) data_mem_inst (
+    // Data Memory - now loads from file
+    data_mem #(
+        .mem_size(256),
+        .rom_size(2),
+        .rom_file("programs/fibo_data.mem")
+    ) data_mem_inst (
         .clk       (clk),
         .rst       (rst),
         .addr      (alu_result[31:0]),

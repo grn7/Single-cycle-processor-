@@ -1,5 +1,6 @@
 module instr_mem #(
-    parameter integer mem_size = 5
+    parameter integer mem_size = 17,  // Increased from 10 to 20
+    parameter string  mem_file = "programs/program.mem"
 ) (
     input  logic [31:0] address,
     output logic [31:0] instruction
@@ -8,19 +9,25 @@ module instr_mem #(
     // Instruction array
     reg [31:0] memory_array [0:mem_size-1];
     
-    // Initialize with our test program
+    // Initialize with NOP instructions first
+    integer i;
     initial begin
-        memory_array[0] = 32'h00003083;  // ld x1, 0(x0)   - Load 15 into x1
-        memory_array[1] = 32'h00803103;  // ld x2, 8(x0)   - Load 25 into x2
-        memory_array[2] = 32'h002081b3;  // add x3, x1, x2 - x3 = x1 + x2 = 40
-        memory_array[3] = 32'h00300f93;  // addi x31, x0, 3 - x31 = 3
-        memory_array[4] = 32'h00000013;  // nop
+        // Initialize all to NOP
+        for (i = 0; i < mem_size; i = i + 1) begin
+            memory_array[i] = 32'h00000013;  // NOP (addi x0, x0, 0)
+        end
         
-        $display("Instructions loaded:");
-        $display("  [0]: 0x%h (ld x1, 0(x0))", memory_array[0]);
-        $display("  [1]: 0x%h (ld x2, 8(x0))", memory_array[1]);
-        $display("  [2]: 0x%h (add x3, x1, x2)", memory_array[2]);
-        $display("  [3]: 0x%h (addi x31, x0, 3)", memory_array[3]);
+        // Load instructions from file
+        $display("Loading instruction memory from %s", mem_file);
+        $readmemh(mem_file, memory_array);
+        
+        // Display loaded instructions
+        $display("Loaded instructions:");
+        for (i = 0; i < mem_size && i < 20; i = i + 1) begin
+            if (memory_array[i] != 32'h00000013) begin
+                $display("  [%0d]: 0x%h", i, memory_array[i]);
+            end
+        end
     end
 
     // Output instruction

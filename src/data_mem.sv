@@ -1,6 +1,6 @@
 module data_mem #(
     parameter integer mem_size = 256,
-    parameter integer rom_size = 2,  // Reduced to 2 to match testbench expectations
+    parameter integer rom_size = 2,
     parameter string  rom_file = "programs/fibo_data.mem"
 ) (
     input  logic        clk,
@@ -42,7 +42,7 @@ module data_mem #(
         if (wr_enable && mem_addr < mem_size) begin
             if (mem_addr >= rom_size) begin
                 memory_array[mem_addr] <= wr_data;
-                $display("MEM WRITE: addr=%0d, data=%0d", mem_addr, wr_data);
+                // Removed debug output to clean up testbench
             end else begin
                 $display("WARNING: Attempted write to ROM region at address %0d", mem_addr);
             end

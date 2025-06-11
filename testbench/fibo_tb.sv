@@ -30,16 +30,34 @@ module fibo_tb;
     int addi_count = 0;
     int total_instr = 0;
     int cycle_count = 0;
+    logic test_finished = 0;
+    
+    // Track Fibonacci numbers computed
+    int prev_fib_count = 0;
+    int current_fib_count = 0;
+
+    // Function to format signed numbers properly
+    function string format_signed(input [63:0] value);
+        if (value[63] == 1'b1) begin
+            // Negative number - convert from two's complement
+            return $sformatf("-%0d", (~value) + 1);
+        end else begin
+            return $sformatf("%0d", value);
+        end
+    endfunction
 
     // Monitor instruction execution with detailed info
     always @(posedge clk) begin
-        if (!rst) begin
+        if (!rst && !test_finished) begin
             cycle_count++;
+            
+            // Track Fibonacci number computation
+            current_fib_count = cpu.dp_inst.rf.registers[5];
             
             // Decode current instruction and display detailed info
             case (cpu.instruction[6:0])
                 7'b0000011: begin // LD
-                    $display("CYCLE %0d | PC: 0x%02h | Instr: 0x%08h | Type: LD", 
+                    $display("CYCLE %0d | PC: 0x%016h | Instr: 0x%08h | Type: LD", 
                              cycle_count, cpu.pc, cpu.instruction);
                     $display("  LD x%0d, %0d(x%0d) | x%0d=%0d -> x%0d", 
                              cpu.instruction[11:7], $signed(cpu.imm[11:0]), cpu.instruction[19:15],
@@ -47,7 +65,7 @@ module fibo_tb;
                     ld_count++;
                 end
                 7'b0100011: begin // SD
-                    $display("CYCLE %0d | PC: 0x%02h | Instr: 0x%08h | Type: SD", 
+                    $display("CYCLE %0d | PC: 0x%016h | Instr: 0x%08h | Type: SD", 
                              cycle_count, cpu.pc, cpu.instruction);
                     $display("  SD x%0d, %0d(x%0d) | Store x%0d=%0d to addr=%0d", 
                              cpu.instruction[24:20], $signed(cpu.imm[11:0]), cpu.instruction[19:15],
@@ -57,7 +75,7 @@ module fibo_tb;
                 7'b0110011: begin // R-type
                     case ({cpu.instruction[31:25], cpu.instruction[14:12]})
                         {7'b0000000, 3'b000}: begin // ADD
-                            $display("CYCLE %0d | PC: 0x%02h | Instr: 0x%08h | Type: ADD", 
+                            $display("CYCLE %0d | PC: 0x%016h | Instr: 0x%08h | Type: ADD", 
                                      cycle_count, cpu.pc, cpu.instruction);
                             $display("  ADD x%0d, x%0d, x%0d | %0d + %0d = %0d", 
                                      cpu.instruction[11:7], cpu.instruction[19:15], cpu.instruction[24:20],
@@ -65,15 +83,15 @@ module fibo_tb;
                             add_count++;
                         end
                         {7'b0100000, 3'b000}: begin // SUB
-                            $display("CYCLE %0d | PC: 0x%02h | Instr: 0x%08h | Type: SUB", 
+                            $display("CYCLE %0d | PC: 0x%016h | Instr: 0x%08h | Type: SUB", 
                                      cycle_count, cpu.pc, cpu.instruction);
-                            $display("  SUB x%0d, x%0d, x%0d | %0d - %0d = %0d", 
+                            $display("  SUB x%0d, x%0d, x%0d | %0d - %0d = %s", 
                                      cpu.instruction[11:7], cpu.instruction[19:15], cpu.instruction[24:20],
-                                     cpu.dp_inst.rs1_data, cpu.dp_inst.rs2_data, cpu.alu_result);
+                                     cpu.dp_inst.rs1_data, cpu.dp_inst.rs2_data, format_signed(cpu.alu_result));
                             sub_count++;
                         end
                         {7'b0000000, 3'b111}: begin // AND
-                            $display("CYCLE %0d | PC: 0x%02h | Instr: 0x%08h | Type: AND", 
+                            $display("CYCLE %0d | PC: 0x%016h | Instr: 0x%08h | Type: AND", 
                                      cycle_count, cpu.pc, cpu.instruction);
                             $display("  AND x%0d, x%0d, x%0d | %0d & %0d = %0d", 
                                      cpu.instruction[11:7], cpu.instruction[19:15], cpu.instruction[24:20],
@@ -81,7 +99,7 @@ module fibo_tb;
                             and_count++;
                         end
                         {7'b0000000, 3'b110}: begin // OR
-                            $display("CYCLE %0d | PC: 0x%02h | Instr: 0x%08h | Type: OR", 
+                            $display("CYCLE %0d | PC: 0x%016h | Instr: 0x%08h | Type: OR", 
                                      cycle_count, cpu.pc, cpu.instruction);
                             $display("  OR x%0d, x%0d, x%0d | %0d | %0d = %0d", 
                                      cpu.instruction[11:7], cpu.instruction[19:15], cpu.instruction[24:20],
@@ -89,22 +107,22 @@ module fibo_tb;
                             or_count++;
                         end
                         default: begin
-                            $display("CYCLE %0d | PC: 0x%02h | Instr: 0x%08h | Type: R-TYPE", 
+                            $display("CYCLE %0d | PC: 0x%016h | Instr: 0x%08h | Type: R-TYPE", 
                                      cycle_count, cpu.pc, cpu.instruction);
                         end
                     endcase
                 end
                 7'b1100011: begin // BEQ
-                    $display("CYCLE %0d | PC: 0x%02h | Instr: 0x%08h | Type: BEQ", 
+                    $display("CYCLE %0d | PC: 0x%016h | Instr: 0x%08h | Type: BEQ", 
                              cycle_count, cpu.pc, cpu.instruction);
-                    $display("  BEQ x%0d, x%0d, %0d | Compare %0d == %0d? %s", 
+                    $display("  BEQ x%0d, x%0d, %0d | Compare %s == %0d? %s", 
                              cpu.instruction[19:15], cpu.instruction[24:20], $signed(cpu.imm),
-                             cpu.dp_inst.rs1_data, cpu.dp_inst.rs2_data, 
+                             format_signed(cpu.dp_inst.rs1_data), cpu.dp_inst.rs2_data, 
                              cpu.zero ? "YES (branch)" : "NO");
                     beq_count++;
                 end
                 7'b0010011: begin // ADDI
-                    $display("CYCLE %0d | PC: 0x%02h | Instr: 0x%08h | Type: ADDI", 
+                    $display("CYCLE %0d | PC: 0x%016h | Instr: 0x%08h | Type: ADDI", 
                              cycle_count, cpu.pc, cpu.instruction);
                     $display("  ADDI x%0d, x%0d, %0d | %0d + %0d = %0d", 
                              cpu.instruction[11:7], cpu.instruction[19:15], $signed(cpu.imm[11:0]),
@@ -112,7 +130,7 @@ module fibo_tb;
                     addi_count++;
                 end
                 default: begin
-                    $display("CYCLE %0d | PC: 0x%02h | Instr: 0x%08h | Type: UNKNOWN", 
+                    $display("CYCLE %0d | PC: 0x%016h | Instr: 0x%08h | Type: UNKNOWN", 
                              cycle_count, cpu.pc, cpu.instruction);
                 end
             endcase
@@ -123,6 +141,14 @@ module fibo_tb;
                      cpu.dp_inst.rf.registers[3], cpu.dp_inst.rf.registers[5], 
                      cpu.dp_inst.rf.registers[31]);
             $display("");
+            
+            // Check if a new Fibonacci number was computed (when x5 increases)
+            if (current_fib_count > prev_fib_count && current_fib_count >= 3) begin
+                $display("--- After %0d cycles: computed %0d fib numbers ---", 
+                         cycle_count, current_fib_count);
+                $display("");
+                prev_fib_count = current_fib_count;
+            end
             
             total_instr++;
         end
@@ -153,15 +179,16 @@ module fibo_tb;
         $display("Reset released, starting Fibonacci calculation...");
         $display("");
         
+        // Initialize tracking
+        prev_fib_count = 0;
+        
         // Run for 100 cycles
         repeat(100) begin
             @(posedge clk);
-            if (cycle_count % 20 == 0 && cycle_count > 0) begin
-                $display("--- After %0d cycles: computed %0d fib numbers ---", 
-                         cycle_count, cpu.dp_inst.rf.registers[5]);
-                $display("");
-            end
         end
+        
+        // Set flag to stop monitoring
+        test_finished = 1;
         
         // Display final results
         $display("=== FINAL RESULTS ===");
